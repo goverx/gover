@@ -1,45 +1,28 @@
 #!/usr/bin/env bash
 set -e
 
-REPO="goverx/gover" # поменяй на настоящий репозиторий
-INSTALL_DIR="/usr/local/bin"
+REPO="goverx/gover"
+BINARY_NAME="gover"
 
-# Определяем OS и архитектуру
+echo "👉 Detecting latest release of $REPO..."
+LATEST=$(curl -s https://api.github.com/repos/$REPO/releases/latest | grep tag_name | cut -d '"' -f4)
+echo "✅ Latest version: $LATEST"
+
 OS=$(uname -s | tr '[:upper:]' '[:lower:]')
 ARCH=$(uname -m)
 
 case $ARCH in
-  x86_64) ARCH="amd64" ;;
-  arm64|aarch64) ARCH="arm64" ;;
-  *) echo "❌ Unsupported architecture: $ARCH"; exit 1 ;;
+    x86_64) ARCH=amd64 ;;
+    arm64) ARCH=arm64 ;;
 esac
 
-echo "👉 Detecting latest release of $REPO..."
-TAG=$(curl -s https://api.github.com/repos/$REPO/releases/latest \
-  | grep '"tag_name":' \
-  | sed -E 's/.*"([^"]+)".*/\1/')
+FILE="${BINARY_NAME}-${OS}-${ARCH}"
 
-if [ -z "$TAG" ]; then
-  echo "❌ Could not fetch latest release tag"
-  exit 1
-fi
-
-echo "✅ Latest version: $TAG"
-
-URL="https://github.com/$REPO/releases/download/$TAG/gover-${OS}-${ARCH}.tar.gz"
-TMP_DIR=$(mktemp -d)
+URL="https://github.com/$REPO/releases/download/$LATEST/$FILE"
 
 echo "📥 Downloading $URL..."
-curl -L "$URL" -o "$TMP_DIR/gover.tar.gz"
+curl -L "$URL" -o "/usr/local/bin/$BINARY_NAME"
 
-echo "📦 Extracting..."
-tar -xzf "$TMP_DIR/gover.tar.gz" -C "$TMP_DIR"
-
-echo "🚀 Installing to $INSTALL_DIR"
-sudo mv "$TMP_DIR/gover" "$INSTALL_DIR/gover"
-sudo chmod +x "$INSTALL_DIR/gover"
-
-rm -rf "$TMP_DIR"
-
-echo "🎉 Installed gover $TAG"
-echo "Run: gover --help"
+chmod +x "/usr/local/bin/$BINARY_NAME"
+echo "✅ Installed $BINARY_NAME to /usr/local/bin/$BINARY_NAME"
+echo "👉 Run '$BINARY_NAME --help'"
