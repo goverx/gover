@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 
 	"gover/internal/service"
 )
@@ -22,8 +23,18 @@ var Manager = goManager{
 }
 
 func (m goManager) Install(version string) error {
-	url := fmt.Sprintf("https://go.dev/dl/go%s.linux-amd64.tar.gz", version)
+	operationSystem := runtime.GOOS
+	arch := runtime.GOARCH
+
+	if operationSystem == "darwin" && arch == "arm64" {
+		arch = "arm64"
+	} else if operationSystem == "darwin" && arch == "amd64" {
+		arch = "amd64"
+	}
+
+	url := fmt.Sprintf("https://go.dev/dl/go%s.%s-%s.tar.gz", version, operationSystem, arch)
 	target := filepath.Join(m.versionsDir, version)
+
 	return service.DownloadAndExtract(url, target)
 }
 
