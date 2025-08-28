@@ -34,10 +34,21 @@ else
 fi
 
 echo "✅ Installed at $INSTALL_PATH"
-"$INSTALL_PATH" --version
+"$INSTALL_PATH" --help
 
 SHELL_RC="$HOME/.zshrc"
-if ! grep -q "alias gover=" "$SHELL_RC" 2>/dev/null; then
-    echo "alias gover='$INSTALL_PATH'" >> "$SHELL_RC"
-    echo "✅ Alias 'gover' added to $SHELL_RC (reload shell to use it)"
+
+if ! grep -q "gover() {" "$SHELL_RC" 2>/dev/null; then
+    cat >> "$SHELL_RC" <<'EOF'
+
+gover() {
+    command gover "$@" || return $?
+    if [[ "$1" == "use" && -n "$2" ]]; then
+        export GOROOT="$HOME/.gover/versions/$2/go"
+        export PATH="$GOROOT/bin:$PATH"
+        echo "✅ PATH updated, now using Go $2"
+    fi
+}
+EOF
+    echo "✅ Shell function 'gover' added to $SHELL_RC (reload shell to use it)"
 fi
