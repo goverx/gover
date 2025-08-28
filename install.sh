@@ -5,7 +5,7 @@ REPO="goverx/gover"
 BINARY="gover"
 
 echo "👉 Detecting latest release of $REPO..."
-LATEST=$(curl -fsSL "https://api.github.com/repos/$REPO/releases/latest" | grep -oP '"tag_name": "\K(.*)(?=")')
+LATEST=$(curl -fsSL "https://api.github.com/repos/$REPO/releases/latest" | jq -r .tag_name)
 echo "✅ Latest version: $LATEST"
 
 OS=$(uname -s | tr '[:upper:]' '[:lower:]')
@@ -35,3 +35,9 @@ fi
 
 echo "✅ Installed at $INSTALL_PATH"
 "$INSTALL_PATH" --version
+
+SHELL_RC="$HOME/.zshrc"
+if ! grep -q "alias gover=" "$SHELL_RC" 2>/dev/null; then
+    echo "alias gover='$INSTALL_PATH'" >> "$SHELL_RC"
+    echo "✅ Alias 'gover' added to $SHELL_RC (reload shell to use it)"
+fi
