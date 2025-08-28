@@ -13,8 +13,7 @@ ARCH=$(uname -m)
 
 case $ARCH in
     x86_64) ARCH="amd64" ;;
-    arm64)  ARCH="arm64" ;;
-    aarch64) ARCH="arm64" ;;
+    arm64 | aarch64) ARCH="arm64" ;;
 esac
 
 URL="https://github.com/$REPO/releases/download/$LATEST/${BINARY}-${OS}-${ARCH}"
@@ -36,7 +35,12 @@ fi
 echo "✅ Installed at $INSTALL_PATH"
 "$INSTALL_PATH" --help
 
-SHELL_RC="$HOME/.zshrc"
+USER_SHELL=$(basename "$SHELL")
+case "$USER_SHELL" in
+    zsh) SHELL_RC="$HOME/.zshrc" ;;
+    bash) SHELL_RC="$HOME/.bashrc" ;;
+    *) SHELL_RC="$HOME/.profile" ;;  # fallback
+esac
 
 if ! grep -q "gover() {" "$SHELL_RC" 2>/dev/null; then
     cat >> "$SHELL_RC" <<'EOF'
@@ -51,4 +55,8 @@ gover() {
 }
 EOF
     echo "✅ Shell function 'gover' added to $SHELL_RC (reload shell to use it)"
+fi
+
+if [ -f "$SHELL_RC" ]; then
+    source "$SHELL_RC"
 fi
