@@ -1,5 +1,7 @@
 # Gover
 
+![Gover Logo](assets/logo.png)
+
 Gover is a lightweight version manager for Go. It helps you install, switch, and manage multiple versions of Go with ease.
 
 ## Installation
